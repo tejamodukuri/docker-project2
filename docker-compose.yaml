@@ -1,0 +1,24 @@
+version: '3.0'
+
+services:
+
+ onboarding:
+  build: .
+  environment:
+  - mongodb://mongo:27017/CRDB02
+  ports:
+  - "7360:6060"
+  depends_on:
+  - mongo
+
+ mongo:
+  image: mongo:latest
+  environment:
+  - MONGO_DATA_DIR=/data/db
+  - MONGO_LOG_DIR=/dev/null
+  volumes:
+  - onboarding_data:/data/db
+  command: mongod --smallfiles --logpath=/dev/null
+
+volumes:
+  onboarding_data:

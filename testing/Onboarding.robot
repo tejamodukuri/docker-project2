@@ -1,0 +1,166 @@
+*** Settings ***
+Library  OperatingSystem
+Library  Collections
+Library  RequestsLibrary
+
+*** Variables ***
+${url}  http://localhost:6060
+
+*** Keywords ***
+Get token
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   login   ${url}    headers=${headers}
+
+    ${object}=  Evaluate  json.load(open("login.json", "r"))   json
+    ${result} =  Post Request  login   /users/login    data=${object}
+    ${token}=  Set Variable  ${result.json()['token']}
+    [return]  ${token}
+
+*** Test Cases ***
+Testing users Intake
+    [Tags]   intake
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   intake   ${url}    headers=${headers}
+
+    ${object}=  Evaluate  json.load(open("intake.json", "r"))   json
+    ${result} =  Post Request  intake   /users/intake    data=${object}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users Account
+    [Tags]   users account
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   account   ${url}    headers=${headers}
+
+    ${object}=  Evaluate  json.load(open("account.json", "r"))   json
+    ${result} =  Post Request  account   /users/account    data=${object}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users login
+    [Tags]   users login
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   login   ${url}    headers=${headers}
+
+    ${object}=  Evaluate  json.load(open("login.json", "r"))   json
+    ${result} =  Post Request  login   /users/login    data=${object}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Test for Getting user account
+    [Tags]   get account
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   user   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${result} =  Get Request  user   /users/106    headers=${token}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users mfa
+    [Tags]   mfa
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   mfa   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${object}=  Evaluate  json.load(open("mfa.json", "r"))   json
+
+    Log  ${object}
+    ${result} =  Post Request  mfa   /users/mfa    headers=${token}    data=${object}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users update account
+    [Tags]   update account
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   update   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${object}=  Evaluate  json.load(open("updateaccount.json", "r"))   json
+
+    Log  ${object}
+    ${result} =  Put Request  update   /users/account    headers=${token}    data=${object}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users profile details
+    [Tags]   profile details
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   Profiledetail   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    ${object}=  Evaluate  json.load(open("profiledetail.json", "r"))   json
+    &{token}=  Create Dictionary  token=${gettoken}    userid=${object['userid']}
+
+    ${result} =  Get Request  Profiledetail   /users/profile/details    headers=${token}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users profile intrest
+    [Tags]   profile intrest
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   intrest   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${object}=  Evaluate  json.load(open("profileintrest.json", "r"))   json
+
+    ${result} =  Post Request  intrest   /users/profile/intrests    headers=${token}    data=${object}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing profile document upload
+    [Tags]   document upload
+    ${file_data}=  Get Binary File  profile.json
+    ${files}=  Create Dictionary  file  ${file_data}
+
+    Create Session   docupload   ${url}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+
+    ${result} =  Post Request  docupload   /users/profile/docupload    headers=${token}    files=${files}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users profile
+    [Tags]   profile
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   profile   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${object}=  Evaluate  json.load(open("profile.json", "r"))   json
+
+    Log  ${object}
+    ${result} =  Post Request  profile   /users/profile    headers=${token}    data=${object}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users profile company
+    [Tags]   company
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   company   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${object}=  Evaluate  json.load(open("company.json", "r"))   json
+
+    Log  ${object}
+    ${result} =  Post Request  company   /users/Profile/company    headers=${token}    data=${object}
+    Log  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
+Testing users profile token
+    [Tags]   token
+    &{headers}=  Create Dictionary  Content-Type=application/json
+    Create Session   token   ${url}    headers=${headers}
+
+    ${gettoken}=  Get token
+    &{token}=  Create Dictionary  token=${gettoken}
+    ${object}=  Evaluate  json.load(open("token.json", "r"))   json
+
+    Log  ${object}
+    ${result} =  Put Request  token   /users/profile/token    headers=${token}    data=${object}
+    Log to Console  ${result.json()}
+    Should Be Equal  ${result.status_code}  ${200}
+
