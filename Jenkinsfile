@@ -22,44 +22,9 @@ pipeline {
               }
     }
 
-    stages {
-        stage("checkout"){
-            steps {
-                checkout scm
-            }
-        }
-    }
-        stage("static code analysis"){
-            steps {
-                withSonarQubeEnv('sonarqube') {
-                    sh '/opt/sonar/bin/sonar-scanner -Dsonar.projectKey=ZervOnboarding -Dsonar.sources=api'
-                }
-            }
-        }
-
         stage("build docker image"){
             steps {
                 sh "docker-compose build"
-            }
-        }
-
-
-        stage("env cleanup"){
-            steps {
-                sh "docker image prune -f"
-            }
-        }
-
-        stage("Launch service"){
-            steps {
-                sh "docker-compose stop"
-                sh "docker-compose up -d"
-            }
-        }
-
-        stage("Launch Info"){
-            steps {
-                echo "service running on ${ip}"
             }
         }
 
