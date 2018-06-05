@@ -10,7 +10,7 @@ git credentialsId: 'fe839c8e-3f44-4a7e-b8c4-97f8ac3fc0e7', url: 'https://github.
     }
    
    stage("Tag & Push image"){
-withDockerRegistry(credentialsId: '085f3b9e-6cb0-4961-9aae-391eba385e8a', url: 'https://hub.docker.com/') {
+withDockerRegistry(credentialsId: '085f3b9e-6cb0-4961-9aae-391eba385e8a', url: 'https://index.docker.io/v1/') {
    sh 'docker tag pythondocker tejamodukuri/board'
           sh 'docker push tejamodukuri/board'
 
